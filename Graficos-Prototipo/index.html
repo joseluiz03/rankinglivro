@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca</title>
+    <link rel="stylesheet" href="Css/style.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <aside id="menu-Oculto" class="menu-Oculto">
+                <div class="imagemMenu">
+                    <img src="img/logoMenu.png" alt="" class="logoMenu">
+                    <button class="fechar" href="" onclick="fecharMenu()"><i class="fa-solid fa-circle-arrow-left"></i></button>
+                </div>
+                    
+                <div class="linha"></div>
+                <div class="opcoes">
+                    <a href=""><i class="fa-solid fa-file"></i> Cadastrar Livro</a>
+                    <a href=""><i class="fa-solid fa-book-open-reader"></i> Cadastrar Empréstimo</a>
+                    <a href=""><i class="fa-solid fa-book-bookmark"></i> Banco de Livros</a>
+                    <a href=""><i class="fa-brands fa-leanpub"></i> Empréstimos</a>
+                    <a href=""><i class="fa-solid fa-user-plus"></i> Adicionar Turma</a>
+                    <a href=""><i class="fa-solid fa-address-book"></i> Pedidos</a>
+                    <a href=""><i class="fa-solid fa-file-import"></i> Relatório</a>
+                    <a href="" class="sair"><i class="fa-solid fa-circle-xmark"></i> Sair</a>
+                </div>
+            </aside>
+            <section id="principal">
+                <span style="font-size:30px;cursor:pointer" onclick="abrirMenu()">&#9776;</span>
+                <div class="nav-logo">
+                    <img src="img/logoEEEP.png" alt="logo" class="logo_eeep"/>
+                    <div class="ret"></div>
+                    <img src="img/logoNav.png" alt="logo" class="library"/>
+                </div>
+            </section>
+        </nav>
+    </header>
+
+    <!-- Ranking e Filtros -->
+    <div class="ranking-filtros">
+        <div class="ranking"><b>Ranking</b></div>
+        <div class="filtros">
+            <div>
+                <select class="mes-inicialFil" name="mes-inicial">
+                    <option value="Mês Inicial">Mês inicial</option>
+                    <!-- Adicione outras opções de meses aqui -->
+                </select>
+            </div>
+            <div>
+                <select name="mes-final" class="mes-finalFil">
+                    <option value="Mês final">Mês final</option>
+                    <!-- Adicione outras opções de meses aqui -->
+                </select>
+            </div>
+            <button class="relatorio"><i class="fa-solid fa-print"></i> Relatório</button>
+        </div>
+    </div>
+
+    <div class="container-filtro-cursos">
+        <select name="cursos" class="filtro-cursos">
+            <option value="curso">SÉRIE</option>
+            <option value="enfermagem">Enfermagem</option>
+            <option value="informatica">Informática</option>
+            <option value="comercio">Comércio</option>
+            <option value="administracao">Administração</option>
+        </select>
+    </div>
+
+    <div class="graficos">
+        <div class="grafico-curso">
+            <div class="teste" id="chart_livros"></div>
+        </div>
+
+        <div class="grafico-livros">
+            <div class="teste" id="chart_cursos"></div>
+        </div>
+    </div>
+
+    <!-- PHP para exibir os rankings -->
+    <?php
+    // Conexão com o banco de dados
+    $conn = new PDO('mysql:host=localhost;dbname=eeepma26_biblioteca', 'seu_usuario', 'sua_senha');
+
+    // Ranking de cursos que mais leram
+    $queryCursos = $conn->query("
+        SELECT t.nome AS turma, COUNT(e.id) AS total_leituras
+        FROM emprestimos e
+        JOIN aluno a ON e.aluno_id = a.id
+        JOIN turma t ON a.turma_id = t.id
+        GROUP BY t.nome
+        ORDER BY total_leituras DESC
+        LIMIT 5
+    ");
+    $rankingCursos = $queryCursos->fetchAll(PDO::FETCH_ASSOC);
+
+    // Ranking dos livros mais lidos
+    $queryLivros = $conn->query("
+        SELECT l.titulo AS livro, COUNT(e.id) AS total_leituras
+        FROM emprestimos e
+        JOIN livros l ON e.livro_id = l.id
+        GROUP BY l.titulo
+        ORDER BY total_leituras DESC
+        LIMIT 5
+    ");
+    $rankingLivros = $queryLivros->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+
+    <div>
+        <h2>Ranking de Cursos</h2>
+        <ul>
+            <?php foreach ($rankingCursos as $curso): ?>
+                <li><?php echo $curso['turma'] . ': ' . $curso['total_leituras'] . ' leituras'; ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+
+    <div>
+        <h2>Ranking de Livros</h2>
+        <ul>
+            <?php foreach ($rankingLivros as $livro): ?>
+                <li><?php echo $livro['livro'] . ': ' . $livro['total_leituras'] . ' leituras'; ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+</body>
+
+<script type="text/javascript" src="scripts.js"></script>
+</html>
